@@ -1,9 +1,15 @@
 import { Grid, GridItem } from '@chakra-ui/react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 
 export default function RootLayout() {
-  return (
+  const location = useLocation();
+
+  const isLandingPage = location.pathname === '/';
+  const isRegisterPage = location.pathname === '/login';
+  const isLoginPage = location.pathname === '/register';
+
+  return !isLandingPage && !isRegisterPage && !isLoginPage ? (
     <Grid templateColumns="repeat(6, 1fr)">
       <GridItem
         as="aside"
@@ -20,5 +26,5 @@ export default function RootLayout() {
         <Outlet />
       </GridItem>
     </Grid>
-  );
+  ) : <><Outlet /></>;
 }

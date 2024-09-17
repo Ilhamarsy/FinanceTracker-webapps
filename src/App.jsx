@@ -16,9 +16,9 @@ import Income from './pages/Income';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<RootLayout />}>
+      <Route index element={<Landing />} />
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
-      <Route index element={<Landing />} />
       <Route
         path="dashboard"
         element={
