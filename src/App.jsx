@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Landing from './pages/Landing';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Register from './pages/Register';
+import Income from './pages/Income';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,8 +28,12 @@ const router = createBrowserRouter(
         }
       />
       <Route path="*" element={<div>Not Found</div>} />
-      {/* <Route path="income" element={<Income />} />
-      <Route path="expense" element={<Expense />} /> */}
+      <Route path="income" element={
+          <ProtectedRoute>
+            <Income />
+          </ProtectedRoute>
+        } />
+      {/* <Route path="expense" element={<Expense />} /> */}
     </Route>
   )
 );
