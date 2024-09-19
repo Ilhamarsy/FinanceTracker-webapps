@@ -25,32 +25,57 @@ import {
   HStack,
   Text,
   Card,
+  Box,
+  Flex,
 } from '@chakra-ui/react';
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
 import { ApiService } from '../services/ApiService';
+import { Select } from 'chakra-react-select';
 
-const IncomePage = () => {
-  const [incomes, setIncomes] = useState([]);
+function Expense() {
+  const [expenses, setExpenses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedIncome, setSelectedIncome] = useState(null);
   const [formData, setFormData] = useState({ title: '', desc: '', amount: '' });
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
+  const [selectedOptions, setSelectedOptions] = useState([]);
+
   useEffect(() => {
-    fetchIncomes();
+    fetchExpenses();
+    fetchCategories();
     // eslint-disable-next-line
   }, []);
 
-  const fetchIncomes = async () => {
+  const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await ApiService.get('/incomes');
-      setIncomes(response.data.data);
+      const response = await ApiService.get('/categories');
+      setCategories(response.data.data);
     } catch (error) {
-      console.error('Error fetching incomes', error);
+      console.error('Error fetching categories', error);
       toast({
-        title: 'Error fetching incomes',
+        title: 'Error fetching categories',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchExpenses = async () => {
+    setLoading(true);
+    try {
+      const response = await ApiService.get('/expenses');
+      setExpenses(response.data.data);
+    } catch (error) {
+      console.error('Error fetching expenses', error);
+      toast({
+        title: 'Error fetching expenses',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -61,7 +86,12 @@ const IncomePage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.amount || !formData.desc) {
+    if (
+      !formData.title ||
+      !formData.desc ||
+      !formData.amount ||
+      selectedOptions.length < 1
+    ) {
       toast({
         title: 'Please fill all fields',
         status: 'warning',
@@ -73,7 +103,12 @@ const IncomePage = () => {
 
     try {
       if (selectedIncome) {
-        await ApiService.put(`/income/${selectedIncome.ID}`, {...formData, amount: parseInt(formData.amount)});
+        console.log(selectedOptions.map(data => data.value));
+        await ApiService.put(`/expense/${selectedIncome.ID}`, {
+          ...formData,
+          amount: parseInt(formData.amount),
+          category_ids: selectedOptions.map(data => data.value),
+        });
         toast({
           title: 'Income updated successfully',
           status: 'success',
@@ -81,7 +116,15 @@ const IncomePage = () => {
           isClosable: true,
         });
       } else {
-        await ApiService.post('/income', {...formData, amount: parseInt(formData.amount)});
+        console.log({
+          ...formData,
+          category_ids: selectedOptions.map(data => data.value),
+        });
+        await ApiService.post('/expense', {
+          ...formData,
+          amount: parseInt(formData.amount),
+          category_ids: selectedOptions.map(data => data.value),
+        });
         toast({
           title: 'Income added successfully',
           status: 'success',
@@ -92,7 +135,7 @@ const IncomePage = () => {
       setFormData({ title: '', desc: '', amount: '' });
       setSelectedIncome(null);
       onClose();
-      fetchIncomes();
+      fetchExpenses();
     } catch (error) {
       console.error('Error adding/updating income', error);
       toast({
@@ -106,7 +149,16 @@ const IncomePage = () => {
 
   const handleEdit = income => {
     setSelectedIncome(income);
-    setFormData({ title: income.title, desc: income.desc, amount: income.amount });
+    setFormData({
+      title: income.title,
+      desc: income.desc,
+      amount: income.amount,
+    });
+    setSelectedOptions(
+      income.categories.map(category => {
+        return { value: category.ID, label: category.name };
+      })
+    );
     onOpen();
   };
 
@@ -120,7 +172,7 @@ const IncomePage = () => {
         duration: 3000,
         isClosable: true,
       });
-      fetchIncomes();
+      fetchExpenses();
     } catch (error) {
       console.error('Error deleting income', error);
       toast({
@@ -144,32 +196,47 @@ const IncomePage = () => {
         <>
           <HStack align="center" mb={4} justify="space-between">
             <Text fontSize={25} fontWeight="bold">
-              Incomes
+              Expenses
             </Text>
             <Button
               colorScheme="teal"
               onClick={() => {
                 onOpen();
                 setFormData({ title: '', desc: '', amount: '' });
+                setSelectedOptions([]);
                 setSelectedIncome(null);
               }}
             >
-              Add New Income
+              Add New Expense
             </Button>
-          </HStack>
+            </HStack>
+            
+            <Box overflow="auto">
 
-          <Table variant="simple">
+            
+
+          <Table variant="simple" >
             <Thead>
               <Tr>
                 <Th>Title</Th>
+                <Th>Category</Th>
                 <Th>Amount</Th>
                 <Th>Actions</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {incomes.map(income => (
-                <Tr key={income.id}>
+              {expenses.map(income => (
+                <Tr key={income.ID}>
                   <Td>{income.title}</Td>
+                  <Td>
+                    <Flex gap={2}>
+                      {income.categories.map(category => (
+                        <Box p={1} bg="gray.200" borderRadius={3} px={2}>
+                          <Text>{category.name}</Text>
+                        </Box>
+                      ))}
+                    </Flex>
+                  </Td>
                   <Td>{income.amount}</Td>
                   <Td>
                     <IconButton
@@ -186,16 +253,17 @@ const IncomePage = () => {
                 </Tr>
               ))}
             </Tbody>
-          </Table>
+              </Table>
+              </Box>
         </>
       )}
 
-      {/* Modal for adding/editing income */}
+      {/* Modal for adding/editing expense */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
-            {selectedIncome ? 'Edit Income' : 'Add Income'}
+            {selectedIncome ? 'Edit Expense' : 'Add Expense'}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -220,6 +288,22 @@ const IncomePage = () => {
               />
             </FormControl>
             <FormControl>
+              <FormLabel>Categories</FormLabel>
+              <Select
+                isMulti
+                options={categories.map(item => {
+                  return { value: item.ID, label: item.name };
+                })}
+                // onChange={handleCategoryChange}
+                value={selectedOptions}
+                onChange={e => {
+                  setSelectedOptions(e);
+                  console.log(e);
+                }}
+                placeholder="Select categories"
+              />
+            </FormControl>
+            <FormControl>
               <FormLabel>Amount</FormLabel>
               <Input
                 placeholder="Income amount"
@@ -240,6 +324,6 @@ const IncomePage = () => {
       </Modal>
     </Card>
   );
-};
+}
 
-export default IncomePage;
+export default Expense;

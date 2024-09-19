@@ -2,70 +2,97 @@ import {
   Box,
   Flex,
   List,
-  ListIcon,
   ListItem,
-  Spacer,
   Text,
 } from '@chakra-ui/react';
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
-import { MdDashboard, MdPerson } from 'react-icons/md';
+import { MdDashboard } from 'react-icons/md';
 import { FaWallet, FaMoneyBill } from 'react-icons/fa';
 
-import { IoIosLogOut } from 'react-icons/io';
+import { IoIosLogOut, IoIosOptions  } from 'react-icons/io';
+import { useAuth } from '../hooks/UseAuth';
 
-function Sidebar({ style }) {
+const menus = [
+  {
+    title: 'Dashboard',
+    icon: <MdDashboard />,
+    path: '/dashboard',
+  },
+  {
+    title: 'Category',
+    icon: <IoIosOptions />,
+    path: '/categories',
+  },
+  {
+    title: 'Income',
+    icon: <FaMoneyBill />,
+    path: '/incomes',
+  },
+  {
+    title: 'Expense',
+    icon: <FaWallet />,
+    path: '/expenses',
+  },
+];
+
+function Sidebar() {
+  
+  const { logout } = useAuth();
+  const location = useLocation();
   return (
-    <Flex justifyContent="center" alignItems="center" h="full" w="full">
+    <Flex justifyContent="center" alignItems="center" h="full" w="full" fontSize={{ lg: 20 }}>
       <List color="white" spacing={4} h="full" w="fit-content">
-        <Flex
-          flexDirection="column"
-          h="full"
-          w="fit-content"
-          justifyContent="space-between"
-        >
-          <Box w="fit-content">
-            <Text align="center" fontSize="x-large" fontWeight="bold" mb="30px">
+        <Flex flexDirection="column" h="full" w="fit-content" justifyContent="space-between">
+          <Box w="fit-content " h="full">
+            <Text align="center" fontSize={{ base: 25, lg: 30 }} fontWeight="bold" mb="30px">
               Tracker
             </Text>
-            <ListItem w="fit-content">
-              <NavLink to="/dashboard">
-                <ListIcon as={MdDashboard} color="white" />
-                <span>Dashboard</span>
-              </NavLink>
-            </ListItem>
-            <Spacer h="10px" />
-            <ListItem w="fit-content">
-              <NavLink to="/income">
-                <ListIcon as={FaWallet} color="white" />
-                <span>Income</span>
-              </NavLink>
-            </ListItem>
-            <Spacer h="10px" />
-            <ListItem w="fit-content">
-              <NavLink to="/expense">
-                <ListIcon as={FaMoneyBill} color="white" />
-                <span>Expense</span>
-              </NavLink>
-            </ListItem>
+            {menus.map((item) => (
+              <ListItem w="full" key={item.path}>
+                <NavLink
+                  to={item.path}
+                >
+                  <Flex
+                    dir="row"
+                    p={2}
+                    px={10}
+                    gap={3}
+                    mb={2}
+                    borderRadius={10}
+                    alignItems="center"
+                    w="full"
+                    bg={location.pathname === item.path ? 'whiteAlpha.800' : 'transparent'}
+                    _hover={{ bg: location.pathname === item.path ? 'whiteAlpha.800' : 'whiteAlpha.400' }}
+                    color={location.pathname === item.path ? 'black' : 'white'}
+                  >
+                    {item.icon}
+                    <span>{item.title}</span>
+                  </Flex>
+                </NavLink>
+              </ListItem>
+            ))}
           </Box>
-          <Box w="fit-content">
-            <ListItem w="fit-content" mt="10px">
-              <NavLink to="/profile">
-                <ListIcon as={MdPerson} color="white" />
-                <span>Profile</span>
-              </NavLink>
-            </ListItem>
-
-            <Spacer h="10px" />
-            <ListItem w="fit-content" color="red">
-              <NavLink to="#">
-                <ListIcon as={IoIosLogOut} color="red" />
+          <ListItem w="full">
+            <NavLink onClick={() => logout()}
+            >
+              <Flex
+                dir="row"
+                p={2}
+                px={10}
+                gap={3}
+                borderRadius={10}
+                alignItems="center"
+                w="full"
+                bg="red.700"
+                _hover={{ bg: 'red.600' }}
+              >
+                <IoIosLogOut />
                 <span>Logout</span>
-              </NavLink>
-            </ListItem>
-          </Box>
+              </Flex>
+            </NavLink>
+          </ListItem>
         </Flex>
       </List>
     </Flex>

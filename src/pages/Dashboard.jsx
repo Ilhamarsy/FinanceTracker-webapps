@@ -1,167 +1,295 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { Box, Card, Center, Flex, Spinner, Text, useToast } from '@chakra-ui/react';
 import {
-  Box,
-  Card,
-  Flex,
-  Text,
-} from '@chakra-ui/react';
-import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
-
-const data = [
-  {
-    name: 'Page A',
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: 'Page B',
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: 'Page C',
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: 'Page D',
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: 'Page E',
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: 'Page F',
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: 'Page G',
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-];
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { ApiService } from '../services/ApiService';
 
 export default function Dashboard() {
-  const chartContainerRef = useRef(null); // Reference for the container
-  const [width, setWidth] = useState(0);  // State to store width
+  const chartContainerRef = useRef(null); 
+  const [width, setWidth] = useState(window.innerWidth / 1.22); // Initialize with a default value
+
+  const [stats, setStats] = useState({
+    total_balance: 0,
+    total_income: 0,
+    total_expense: 0,
+    monthly_balance: 0,
+    monthly_income: 0,
+    monthly_expense: 0,
+  });
+
+  const [data, setData] = useState([
+    {
+      id: 1,
+      month: 'January',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 2,
+      month: 'February',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 3,
+      month: 'March',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 4,
+      month: 'April',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 5,
+      month: 'May',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 6,
+      month: 'June',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 7,
+      month: 'July',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 8,
+      month: 'August',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 9,
+      month: 'September',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 10,
+      month: 'October',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 11,
+      month: 'November',
+      income: 0,
+      expense: 0,
+    },
+    {
+      id: 12,
+      month: 'December',
+      income: 0,
+      expense: 0,
+    },
+  ])
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Function to update the width of the chart container
     const updateWidth = () => {
       if (chartContainerRef.current) {
         setWidth(chartContainerRef.current.offsetWidth);
       }
     };
 
-    // Initial width setting
-    updateWidth();
-
-    // Add event listener for window resize
+    
     window.addEventListener('resize', updateWidth);
-
-    // Cleanup event listener on component unmount
+    updateWidth();
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  return (
-    <Flex flexDir="column" w="full" h="full" gap="30px">
-      <Box>
-        <Text fontWeight="bold" fontSize={30} align="center">Dashboard</Text>
-      </Box>
-      <Card>
-        <Text align="center" fontWeight="bold" pt="10px">Total</Text>
-        <Flex
-          flexDir={{ base: 'column', lg: 'row' }}
-          justifyContent="space-between"
-          p="10px"
-          gap={4}
-        >
-          <Card w="full" p="10px" align="center">
-            <Text fontSize="15" color="gray">Balance</Text>
-            <Text fontWeight="bold" fontSize="35" color="teal">
-              10000
-            </Text>
-          </Card>
-          <Card w="full" p="10px" align="center">
-            <Text fontSize="15" color="gray">Income</Text>
-            <Text fontWeight="bold" fontSize="35" color="green">
-              10000
-            </Text>
-          </Card>
-          <Card w="full" p="10px" align="center">
-            <Text fontSize="15" color="gray">Outcome</Text>
-            <Text fontWeight="bold" fontSize="35" color="red">
-              10000
-            </Text>
-          </Card>
-        </Flex>
-      </Card>
 
-      <Card ref={chartContainerRef} gap={4}> {/* Ref for chart container */}
-        <Text align="center" fontWeight="bold" pt="10px">Monthly</Text>
-        <Flex
-          flexDir={{ base: 'column', lg: 'row' }}
-          justifyContent="space-between"
-          p="10px"
-          gap={4}
-        >
-          <Card w="full" p="10px" align="center">
-            <Text fontSize="15" color="gray">Balance</Text>
-            <Text fontWeight="bold" fontSize="35" color="teal">
-              10000
-            </Text>
-          </Card>
-          <Card w="full" p="10px" align="center">
-            <Text fontSize="15" color="gray">Income</Text>
-            <Text fontWeight="bold" fontSize="35" color="green">
-              10000
-            </Text>
-          </Card>
-          <Card w="full" p="10px" align="center">
-            <Text fontSize="15" color="gray">Outcome</Text>
-            <Text fontWeight="bold" fontSize="35" color="red">
-              10000
-            </Text>
-          </Card>
-        </Flex>
+  const toast = useToast();
 
-        {/* Area Chart with dynamic width */}
-        {width > 0 && (
-          <>
-          <AreaChart
-            width={width}  // Dynamic width based on container
-            height={400}
-            data={data}
-            margin={
-              {top: 0,
-                right: 40,
-                left: 20,
-                bottom: 0,}
-              }
-              
+  useEffect(() => { 
+    fetchIncomes()
+    fetchYearlyStat()
+    // eslint-disable-next-line
+  }, [])
+
+  const fetchYearlyStat = async () => {
+    setLoading(true);
+    try {
+      const response = await ApiService.get(`/stats-yearly?year=${new Date().getFullYear()}`);
+      const { expenses, incomes } = response.data.data;
+  
+      setData((prevData) => {
+        return prevData.map((item) => {
+          const expenseForMonth = expenses?.find((exp) => exp.Month === item.id);
+          const incomeForMonth = incomes?.find((inc) => inc.Month === item.id);
+  
+          return {
+            ...item,
+            income: incomeForMonth ? incomeForMonth.Total : item.income,
+            expense: expenseForMonth ? expenseForMonth.Total : item.expense,
+          };
+        });
+      });
+  
+    } catch (error) {
+      console.error("Error fetching incomes", error);
+      toast({
+        title: "Error fetching:" + error.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  
+  const fetchIncomes = async () => {
+    setLoading(true);
+    try {
+      const response = await ApiService.get("/stats");
+      setStats(response.data.data);
+    } catch (error) {
+      console.error("Error fetching incomes", error);
+      toast({
+        title: "Error fetching:" + error.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return loading ? (
+    <Center height="100%">
+      <Spinner size="xl" color="teal.500" />
+    </Center>
+  ) : (
+    <>
+      <Flex flexDir="column" w="full" h="full" gap="30px">
+        <Box>
+          <Text fontWeight="bold" fontSize={30} align="center">
+            Dashboard
+          </Text>
+        </Box>
+        <Card bg="#EEEDEB">
+          <Text align="center" fontWeight="bold" pt="30px" fontSize="x-large">
+            Total
+          </Text>
+          <Flex
+            flexDir={{ base: 'column', lg: 'row' }}
+            justifyContent="space-between"
+            p="10px"
+            gap={4}
+          >
+            <Card w="full" p="10px" align="center">
+              <Text fontSize="15" color="gray">
+                Balance
+              </Text>
+              <Text fontWeight="bold" fontSize="35" color="teal">
+                {stats.total_balance}
+              </Text>
+            </Card>
+            <Card w="full" p="10px" align="center">
+              <Text fontSize="15" color="gray">
+                Income
+              </Text>
+              <Text fontWeight="bold" fontSize="35" color="green">
+                {stats.total_income}
+              </Text>
+            </Card>
+            <Card w="full" p="10px" align="center">
+              <Text fontSize="15" color="gray">
+                Expense
+              </Text>
+              <Text fontWeight="bold" fontSize="35" color="red">
+                {stats.total_expense}
+              </Text>
+            </Card>
+          </Flex>
+        </Card>
+
+        <Card ref={chartContainerRef} gap={4} bg="#EEEDEB">
+          <Text align="center" fontWeight="bold" pt="30px" fontSize="x-large">
+            Monthly
+          </Text>
+          <Flex
+            flexDir={{ base: 'column', lg: 'row' }}
+            justifyContent="space-between"
+            p="20px"
+            gap={4}
+          >
+            <Card w="full" p="10px" align="center">
+              <Text fontSize="15" color="gray">
+                Balance
+              </Text>
+              <Text fontWeight="bold" fontSize="35" color="teal">
+                {stats.monthly_balance}
+              </Text>
+            </Card>
+            <Card w="full" p="10px" align="center">
+              <Text fontSize="15" color="gray">
+                Income
+              </Text>
+              <Text fontWeight="bold" fontSize="35" color="green">
+                {stats.monthly_income}
+              </Text>
+            </Card>
+            <Card w="full" p="10px" align="center">
+              <Text fontSize="15" color="gray">
+              Expense
+              </Text>
+              <Text fontWeight="bold" fontSize="35" color="red">
+                {stats.monthly_expense}
+              </Text>
+            </Card>
+          </Flex>
+
+          {/* Area Chart with dynamic width */}
+          {width > 0 && (
+            <Box bg="white" mb={10} mx="20px" px={10} py={10} borderRadius={10}>
+              <AreaChart
+                width={width - 120} // Dynamic width based on container
+                height={400}
+                data={data}
+                margin={{ top: 10, right: 40, left: 20, bottom: 0 }}
               >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="uv" stackId="1" stroke="#8884d8" fill="#8884d8" />
-            <Area type="monotone" dataKey="pv" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-            <Area type="monotone" dataKey="amt" stackId="1" stroke="#ffc658" fill="#ffc658" />
-          </AreaChart>
-        </>
-        )}
-      </Card>
-    </Flex>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="income"
+                  stackId="1"
+                  stroke="#82ca9d"
+                  fill="#82ca9d"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="expense"
+                  stackId="2"
+                  stroke="#C7253E"
+                  fill="#C7253E"
+                />
+              </AreaChart>
+            </Box>
+          )}
+        </Card>
+      </Flex>
+    </>
   );
 }

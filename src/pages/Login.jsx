@@ -45,8 +45,8 @@ export default function Login() {
     setIsLoading(true);
   
     try {
-      await login(email, password); // Wait for the login to complete
-      setIsLoading(false); // Reset the loading state only after login completes
+      await login(email, password);
+      setIsLoading(false);
     } catch (err) {
       setIsLoading(false);
       console.error('Error during login:', err);
